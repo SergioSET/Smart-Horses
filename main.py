@@ -1,5 +1,12 @@
 import pygame
 import random
+import os
+
+def limpiar_consola():
+    if os.name == 'nt':  # Para sistemas Windows
+        os.system('cls')
+    else:  # Para sistemas basados en Unix (Linux, macOS, etc.)
+        os.system('clear')
 
 # Dimensiones de la ventana
 ANCHO_VENTANA = 500
@@ -127,7 +134,23 @@ class Tablero:
                         posiciones.remove([self.caballo_blanco_y, self.caballo_blanco_x])
 
         return posiciones
+    
+    def verificarGanador(self):
+        cantidadPuntuacion = 0
+        for fila in range(FILAS):
+            for columna in range(COLUMNAS):
+                if (self.matriz[fila][columna] != 0):
+                    cantidadPuntuacion += 1
 
+        if (cantidadPuntuacion == 0):
+            if (self.puntuacion_caballo_blanco > self.puntuacion_caballo_negro):
+                print("Ha ganado el caballo blanco")
+            elif (self.puntuacion_caballo_negro > self.puntuacion_caballo_blanco):
+                print("Ha ganado el caballo negro")
+            else:
+                print("Han quedado en empate")
+            pygame.quit()
+            exit()
 
     def mover_caballo(self, x, y, posiciones):
         valor = self.matriz[y][x]
@@ -144,8 +167,11 @@ class Tablero:
             self.matriz[y][x] = 0
             self.turno *= -1
 
+        limpiar_consola()
         print("Puntuación caballo blanco: " + str(self.puntuacion_caballo_blanco))
         print("Puntuación caballo negro: " + str(self.puntuacion_caballo_negro))
+
+        tablero.verificarGanador()
 
 # Inicializar Pygame
 pygame.init()
