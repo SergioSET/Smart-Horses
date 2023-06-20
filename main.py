@@ -26,7 +26,8 @@ COLOR_CELDA = (255, 255, 255)
 COLOR_BORDE_CELDA = (0, 0, 0)
 COLOR_CABALLO_BLANCO = (200, 200, 255)
 COLOR_CABALLO_NEGRO = (0, 0, 0)
-COLOR_RESALTAR = (128, 128, 128)
+COLOR_PUNTUACION = (191, 202, 197)
+COLOR_RESALTAR = (152, 253, 209)
 
 # Rutas de las imágenes de caballos
 RUTA_CABALLO_BLANCO = "caballo_blanco.png"
@@ -86,6 +87,9 @@ class Tablero:
                 # Celda con borde de color negro
                 if (resaltar.__contains__([fila, columna])):
                     pygame.draw.rect(ventana, COLOR_RESALTAR, (columna * ANCHO_CELDA, fila * ALTO_CELDA, ANCHO_CELDA, ALTO_CELDA))
+                    pygame.draw.rect(ventana, COLOR_BORDE_CELDA, (columna * ANCHO_CELDA, fila * ALTO_CELDA, ANCHO_CELDA, ALTO_CELDA), 1)
+                elif (self.matriz[fila][columna] > 0):
+                    pygame.draw.rect(ventana, COLOR_PUNTUACION, (columna * ANCHO_CELDA, fila * ALTO_CELDA, ANCHO_CELDA, ALTO_CELDA))
                     pygame.draw.rect(ventana, COLOR_BORDE_CELDA, (columna * ANCHO_CELDA, fila * ALTO_CELDA, ANCHO_CELDA, ALTO_CELDA), 1)
                 else: 
                     pygame.draw.rect(ventana, COLOR_CELDA, (columna * ANCHO_CELDA, fila * ALTO_CELDA, ANCHO_CELDA, ALTO_CELDA))
