@@ -25,24 +25,50 @@ COLOR_RESALTAR = (128, 128, 128)
 RUTA_CABALLO_BLANCO = "caballo_blanco.png"
 RUTA_CABALLO_NEGRO = "caballo_negro.png"
 
+posiciones_caballo = []
+while len(posiciones_caballo) < 2:
+    x = random.randint(0,7)
+    y = random.randint(0,7)
+    nueva_posicion = [x, y]
+
+    if nueva_posicion not in posiciones_caballo:
+        posiciones_caballo.append(nueva_posicion)
+
+matriz = [[0] * COLUMNAS for _ in range(FILAS)]
+
+puntuaciones = []
+while len(puntuaciones) < 8:
+    x = random.randint(0,7)
+    y = random.randint(0,7)
+    nueva_posicion = [x, y]
+
+    if nueva_posicion not in puntuaciones and nueva_posicion not in posiciones_caballo:
+        puntuaciones.append(nueva_posicion)
+
+for i in range(len(puntuaciones)):
+    x = puntuaciones[i][0]
+    y = puntuaciones[i][1]
+    matriz[y][x] = i
+
 # Clase para representar el tablero del juego
 class Tablero:
     def __init__(self):
         # Matriz
-        self.matriz = [[0] * COLUMNAS for _ in range(FILAS)]
-
+        self.matriz = matriz
 
         # -1 para el caballo blanco, 1 para el caballo negro
         self.turno = -1
 
         # Atributos caballo blanco
-        self.caballo_blanco_x = random.randint(0, COLUMNAS - 1)
-        self.caballo_blanco_y = random.randint(0, FILAS - 1)
+        self.caballo_blanco_x = posiciones_caballo[0][0]
+        self.caballo_blanco_y = posiciones_caballo[0][1]
+        self.puntuacion_caballo_blanco = 0
         self.imagen_caballo_blanco = pygame.image.load(RUTA_CABALLO_BLANCO)
 
         # Atributos caballo negro
-        self.caballo_negro_x = random.randint(0, COLUMNAS - 1)
-        self.caballo_negro_y = random.randint(0, FILAS - 1)
+        self.caballo_negro_x = posiciones_caballo[1][0]
+        self.caballo_negro_y = posiciones_caballo[1][1]
+        self.puntuacion_caballo_negro = 0
         self.imagen_caballo_negro = pygame.image.load(RUTA_CABALLO_NEGRO)
 
 
@@ -51,9 +77,6 @@ class Tablero:
         for fila in range(FILAS):
             for columna in range(COLUMNAS):
                 # Celda con borde de color negro
-                # pygame.draw.rect(ventana, COLOR_CELDA, (columna * ANCHO_CELDA, fila * ALTO_CELDA, ANCHO_CELDA, ALTO_CELDA))
-                # pygame.draw.rect(ventana, COLOR_BORDE_CELDA, (columna * ANCHO_CELDA, fila * ALTO_CELDA, ANCHO_CELDA, ALTO_CELDA), 1)
-
                 if (resaltar.__contains__([fila, columna])):
                     pygame.draw.rect(ventana, COLOR_RESALTAR, (columna * ANCHO_CELDA, fila * ALTO_CELDA, ANCHO_CELDA, ALTO_CELDA))
                     pygame.draw.rect(ventana, COLOR_BORDE_CELDA, (columna * ANCHO_CELDA, fila * ALTO_CELDA, ANCHO_CELDA, ALTO_CELDA), 1)
@@ -61,6 +84,11 @@ class Tablero:
                     pygame.draw.rect(ventana, COLOR_CELDA, (columna * ANCHO_CELDA, fila * ALTO_CELDA, ANCHO_CELDA, ALTO_CELDA))
                     pygame.draw.rect(ventana, COLOR_BORDE_CELDA, (columna * ANCHO_CELDA, fila * ALTO_CELDA, ANCHO_CELDA, ALTO_CELDA), 1)
 
+                if (self.matriz[fila][columna] > 0):
+                    valor = self.matriz[fila][columna]
+                    fuente = pygame.font.Font(None, 20)
+                    texto = fuente.render(str(valor), True, COLOR_BORDE_CELDA)
+                    ventana.blit(texto, (columna * ANCHO_CELDA + 5, fila * ALTO_CELDA + 5))
 
                 # Dibujar caballo blanco
                 if fila == self.caballo_blanco_y and columna == self.caballo_blanco_x:
@@ -102,16 +130,22 @@ class Tablero:
 
 
     def mover_caballo(self, x, y, posiciones):
-        
+        valor = self.matriz[y][x]
         if posiciones.__contains__([y, x]):
             if self.turno == -1:
                 self.caballo_blanco_x = x
                 self.caballo_blanco_y = y
+                self.puntuacion_caballo_blanco += valor
             else:
                 self.caballo_negro_x = x
                 self.caballo_negro_y = y
-
+                self.puntuacion_caballo_negro += valor
+                
+            self.matriz[y][x] = 0
             self.turno *= -1
+
+        print("Puntuación caballo blanco: " + str(self.puntuacion_caballo_blanco))
+        print("Puntuación caballo negro: " + str(self.puntuacion_caballo_negro))
 
 # Inicializar Pygame
 pygame.init()
