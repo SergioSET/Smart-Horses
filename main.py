@@ -1,6 +1,7 @@
 import pygame
 import random
 import os
+import copia as copia
 
 def limpiar_consola():
     if os.name == 'nt':  # Para sistemas Windows
@@ -118,6 +119,7 @@ class Tablero:
         for fila in range(FILAS):
             for columna in range(COLUMNAS):
                 if self.turno == -1:
+
                     if ((fila == self.caballo_blanco_y + 2 or fila == self.caballo_blanco_y - 2) and (columna == self.caballo_blanco_x + 1 or columna == self.caballo_blanco_x - 1)):
                         posiciones.append([fila,columna])
                         
@@ -126,7 +128,7 @@ class Tablero:
 
                     if (posiciones.__contains__([self.caballo_negro_y, self.caballo_negro_x])):
                         posiciones.remove([self.caballo_negro_y, self.caballo_negro_x])
-
+                    print(posiciones)
                 else:
                     if ((fila == self.caballo_negro_y + 2 or fila == self.caballo_negro_y - 2) and (columna == self.caballo_negro_x + 1 or columna == self.caballo_negro_x - 1)):
                         posiciones.append([fila,columna])
@@ -167,11 +169,12 @@ class Tablero:
                 self.caballo_negro_x = x
                 self.caballo_negro_y = y
                 self.puntuacion_caballo_negro += valor
+                print(self.caballo_negro_x)
                 
             self.matriz[y][x] = 0
             self.turno *= -1
 
-        limpiar_consola()
+        # limpiar_consola()
         print("Puntuación caballo blanco: " + str(self.puntuacion_caballo_blanco))
         print("Puntuación caballo negro: " + str(self.puntuacion_caballo_negro))
 
