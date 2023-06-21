@@ -225,22 +225,23 @@ class Tablero:
         # print(self.caballo_negro_x)
         # print(self.caballo_negro_y)
         valor = self.matriz[y][x]
-        profundidad =  2
+        profundidad =  3
         raiz = Nodo(matriz,self.caballo_blanco_x,self.caballo_blanco_y,self.caballo_negro_x,self.caballo_negro_y,-1,profundidad, 0)
         print(raiz.mejor_jugada.caballo_blanco_x)
         print(raiz.mejor_jugada.caballo_blanco_y)
         if posiciones.__contains__([y, x]):
             if self.turno == -1:
                 
-                print()
-                # self.caballo_blanco_x = x
-                # self.caballo_blanco_y = y
-                # self.puntuacion_caballo_blanco += valor
+                print("SI")
+                self.caballo_blanco_x = raiz.mejor_jugada.caballo_blanco_x
+                self.caballo_blanco_y = raiz.mejor_jugada.caballo_blanco_y
+                self.puntuacion_caballo_blanco += valor
             else:
                 self.caballo_negro_x = x
                 self.caballo_negro_y = y
                 self.puntuacion_caballo_negro += valor
-                print(self.caballo_negro_x)
+                #print(self.caballo_negro_x)
+                #print(self.caballo_negro_y)
                 
             self.matriz[y][x] = 0
             self.turno *= -1
