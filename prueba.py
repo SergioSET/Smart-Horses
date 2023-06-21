@@ -99,12 +99,20 @@ class Nodo:
 
     def calcular_mejor_jugada(self):
         mejor_valor = float('-inf')
+        peor_valor = float('inf')
         mejor_hijo = None
 
         for hijo in self.hijosE:
-            if hijo.valor > mejor_valor:
-                mejor_valor = hijo.valor
-                mejor_hijo = hijo
+            if tablero.turno == -1:
+                # Turno caballo blanco, busca el mejor valor
+                if hijo.valor > mejor_valor:
+                    mejor_valor = hijo.valor
+                    mejor_hijo = hijo
+            else:
+                # Turno caballo negro, busca el peor valor
+                if hijo.valor < peor_valor:
+                    peor_valor = hijo.valor
+                    mejor_hijo = hijo
 
         return mejor_hijo
 
