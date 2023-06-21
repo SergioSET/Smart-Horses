@@ -2,6 +2,7 @@ import pygame
 import random
 import os
 from copy import deepcopy
+from graphviz import Digraph
 
 def limpiar_consola():
     if os.name == 'nt':  # Para sistemas Windows
@@ -60,7 +61,7 @@ for i in range(len(puntuaciones)):
     matriz[y][x] = i
 
 class Nodo:
-    def __init__(self,matriz,caballo_blanco_x,caballo_blanco_y,caballo_negro_x,caballo_negro_y,turno,profundidad,  valor):
+    def __init__(self,matriz,caballo_blanco_x,caballo_blanco_y,caballo_negro_x,caballo_negro_y,turno,profundidad,  valorAB, valorAN):
         self.matriz = matriz
         self.caballo_blanco_x = caballo_blanco_x
         self.caballo_blanco_y = caballo_blanco_y
@@ -68,7 +69,8 @@ class Nodo:
         self.caballo_negro_y = caballo_negro_y
         self.hijosE = []
         tablero.turno = turno
-        self.valor = valor
+        self.valorAB = valorAB
+        self.valorAN = valorAN
         self.profundidad= profundidad
         self.hijos = tablero.posiciones_disponibles()
 
@@ -79,28 +81,19 @@ class Nodo:
             # Turno caballo negro
             for i in self.hijos:
                 matrizNueva = deepcopy(self.matriz)
-                valorT =  self.valor +  self.matriz[i[0]][i[1]]
+                valorAB =  self.valorAB +  self.matriz[i[0]][i[1]]
                 matrizNueva[i[0]][i[1]] = 0
-                nuevo_hijo = Nodo(matrizNueva,i[0],i[1],self.caballo_negro_x,self.caballo_negro_y,1,self.profundidad-1, valorT)
+                nuevo_hijo = Nodo(matrizNueva,i[0],i[1],self.caballo_negro_x,self.caballo_negro_y,1,self.profundidad-1, valorAB, self.valorAN)
                 self.hijosE.append(nuevo_hijo)
         else:
             # Turno caballo negro
             for i in self.hijos:
                 matrizNueva = deepcopy(self.matriz)
-                valorT = self.valor + self.matriz[i[0]][i[1]]
+                valorAN = self.valorAN + self.matriz[i[0]][i[1]]
                 matrizNueva[i[0]][i[1]] = 0
-                nuevo_hijo = Nodo(matrizNueva,self.caballo_blanco_x,self.caballo_blanco_y,i[0],i[1],-1,self.profundidad-1,valorT)
+                nuevo_hijo = Nodo(matrizNueva,self.caballo_blanco_x,self.caballo_blanco_y,i[0],i[1],-1,self.profundidad-1,self.valorAB, valorAN)
                 self.hijosE.append(nuevo_hijo)
         
-
-
-            
-
-            
-
-
-
-
 # Clase para representar el tablero del juego
 class Tablero:
     def __init__(self):
@@ -217,9 +210,17 @@ class Tablero:
         # print(self.caballo_negro_x)
         # print(self.caballo_negro_y)
         valor = self.matriz[y][x]
-        profundidad =  2
+        profundidad =  10
         raiz = Nodo(matriz,self.caballo_blanco_x,self.caballo_blanco_y,self.caballo_negro_x,self.caballo_negro_y,-1,profundidad, 0)
         print(raiz.hijosE)
+        def generar_grafo_1(nodo, grafo):
+            grafo.node(str(id(nodo)))
+            for hijo in nodo.hijosE:
+                grafo.edge(str(id(nodo)), str(id(hijo)))
+                generar_grafo_1(hijo, grafo)
+        grafo1 = Digraph()
+        generar_grafo_1(raiz, grafo1)
+        grafo1.render('grafo', view=True)
         if posiciones.__contains__([y, x]):
             if self.turno == -1:
                 
@@ -272,4 +273,8 @@ while True:
     
     tablero.dibujar(ventana, posiciones)
     pygame.display.flip()
+
+    
+
+    
  
