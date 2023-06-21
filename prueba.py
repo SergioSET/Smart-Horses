@@ -60,7 +60,7 @@ for i in range(len(puntuaciones)):
     matriz[y][x] = i
 
 class Nodo:
-    def __init__(self,matriz,caballo_blanco_x,caballo_blanco_y,caballo_negro_x,caballo_negro_y,turno,profundidad, valor):
+    def __init__(self, matriz, caballo_blanco_x, caballo_blanco_y, caballo_negro_x, caballo_negro_y, turno, profundidad, valor):
         self.matriz = matriz
         self.caballo_blanco_x = caballo_blanco_x
         self.caballo_blanco_y = caballo_blanco_y
@@ -69,19 +69,23 @@ class Nodo:
         self.hijosE = []
         tablero.turno = turno
         self.valor = valor
-        self.profundidad= profundidad
+        self.profundidad = profundidad
         self.hijos = tablero.posiciones_disponibles()
 
         if profundidad != 0:
             self.crear_hijos()
+        
+        self.mejor_jugada = self.calcular_mejor_jugada()
+
     def crear_hijos(self):
-        if tablero.turno == -1 :
+        if tablero.turno == -1:
             # Turno caballo blanco
             for i in self.hijos:
                 matrizNueva = deepcopy(self.matriz)
-                valorT =  self.valor +  self.matriz[i[0]][i[1]]
+                valorT = self.valor + self.matriz[i[0]][i[1]]
                 matrizNueva[i[0]][i[1]] = 0
-                nuevo_hijo = Nodo(matrizNueva,i[0],i[1],self.caballo_negro_x,self.caballo_negro_y,1,self.profundidad-1, valorT)
+                nuevo_hijo = Nodo(matrizNueva, i[0], i[1], self.caballo_negro_x, self.caballo_negro_y, 1,
+                                  self.profundidad - 1, valorT)
                 self.hijosE.append(nuevo_hijo)
         else:
             # Turno caballo negro
@@ -89,10 +93,11 @@ class Nodo:
                 matrizNueva = deepcopy(self.matriz)
                 valorT = self.valor + self.matriz[i[0]][i[1]]
                 matrizNueva[i[0]][i[1]] = 0
-                nuevo_hijo = Nodo(matrizNueva,self.caballo_blanco_x,self.caballo_blanco_y,i[0],i[1],-1,self.profundidad-1,valorT)
+                nuevo_hijo = Nodo(matrizNueva, self.caballo_blanco_x, self.caballo_blanco_y, i[0], i[1], -1,
+                                  self.profundidad - 1, valorT)
                 self.hijosE.append(nuevo_hijo)
-                
-    def mejor_jugada(self):
+
+    def calcular_mejor_jugada(self):
         mejor_valor = float('-inf')
         mejor_hijo = None
 
@@ -102,8 +107,8 @@ class Nodo:
                 mejor_hijo = hijo
 
         return mejor_hijo
-        
 
+        
 # Clase para representar el tablero del juego
 class Tablero:
     def __init__(self):
@@ -222,7 +227,8 @@ class Tablero:
         valor = self.matriz[y][x]
         profundidad =  2
         raiz = Nodo(matriz,self.caballo_blanco_x,self.caballo_blanco_y,self.caballo_negro_x,self.caballo_negro_y,-1,profundidad, 0)
-        print(raiz.hijosE)
+        print(raiz.mejor_jugada.caballo_blanco_x)
+        print(raiz.mejor_jugada.caballo_blanco_y)
         if posiciones.__contains__([y, x]):
             if self.turno == -1:
                 
@@ -245,33 +251,6 @@ class Tablero:
 
         tablero.verificarGanador()
         
-def mejor_jugada(nodo, es_maximizador):
-    # Caso base: si es un nodo hoja, retornar su valor
-    if not nodo.hijos:
-        return nodo.valor
-
-    # Inicializar la mejor jugada y su valor
-    mejor_valor = float('-inf') if es_maximizador else float('inf')
-    mejor_jugada = None
-
-    # Recorrer los nodos hijos
-    for hijo in nodo.hijos:
-        # Calcular el valor del nodo hijo
-        valor_hijo = mejor_jugada(hijo, not es_maximizador)
-
-        # Actualizar la mejor jugada y su valor en función del jugador
-        if es_maximizador:
-            if valor_hijo > mejor_valor:
-                mejor_valor = valor_hijo
-                mejor_jugada = hijo
-        else:
-            if valor_hijo < mejor_valor:
-                mejor_valor = valor_hijo
-                mejor_jugada = hijo
-
-    # Retornar el valor de la mejor jugada
-    return mejor_valor
-
 
 # Inicializar Pygame
 pygame.init()
