@@ -1,14 +1,13 @@
 import pygame
 import random
 import os
-
+from copy import deepcopy
 
 def limpiar_consola():
     if os.name == 'nt':  # Para sistemas Windows
         os.system('cls')
     else:  # Para sistemas basados en Unix (Linux, macOS, etc.)
         os.system('clear')
-
 
 # Dimensiones de la ventana
 ANCHO_VENTANA = 500
@@ -35,13 +34,10 @@ COLOR_RESALTAR = (152, 253, 209)
 RUTA_CABALLO_BLANCO = "caballo_blanco.png"
 RUTA_CABALLO_NEGRO = "caballo_negro.png"
 
-#Profundidad del arbol minimax
-MAX_PROFUNDIDAD = 3
-
 posiciones_caballo = []
 while len(posiciones_caballo) < 2:
-    x = random.randint(0, 7)
-    y = random.randint(0, 7)
+    x = random.randint(0,7)
+    y = random.randint(0,7)
     nueva_posicion = [x, y]
 
     if nueva_posicion not in posiciones_caballo:
@@ -51,8 +47,8 @@ matriz = [[0] * COLUMNAS for _ in range(FILAS)]
 
 puntuaciones = []
 while len(puntuaciones) < 8:
-    x = random.randint(0, 7)
-    y = random.randint(0, 7)
+    x = random.randint(0,7)
+    y = random.randint(0,7)
     nueva_posicion = [x, y]
 
     if nueva_posicion not in puntuaciones and nueva_posicion not in posiciones_caballo:
@@ -63,6 +59,51 @@ for i in range(len(puntuaciones)):
     y = puntuaciones[i][1]
     matriz[y][x] = i
 
+class Nodo:
+    def __init__(self,matriz,caballo_blanco_x,caballo_blanco_y,caballo_negro_x,caballo_negro_y,turno,profundidad, valor):
+        self.matriz = matriz
+        self.caballo_blanco_x = caballo_blanco_x
+        self.caballo_blanco_y = caballo_blanco_y
+        self.caballo_negro_x = caballo_negro_x
+        self.caballo_negro_y = caballo_negro_y
+        self.hijosE = []
+        tablero.turno = turno
+        self.valor = valor
+        self.profundidad= profundidad
+        self.hijos = tablero.posiciones_disponibles()
+
+        if profundidad != 0:
+            self.crear_hijos()
+    def crear_hijos(self):
+        if tablero.turno == -1 :
+            # Turno caballo blanco
+            for i in self.hijos:
+                matrizNueva = deepcopy(self.matriz)
+                valorT =  self.valor +  self.matriz[i[0]][i[1]]
+                matrizNueva[i[0]][i[1]] = 0
+                nuevo_hijo = Nodo(matrizNueva,i[0],i[1],self.caballo_negro_x,self.caballo_negro_y,1,self.profundidad-1, valorT)
+                self.hijosE.append(nuevo_hijo)
+        else:
+            # Turno caballo negro
+            for i in self.hijos:
+                matrizNueva = deepcopy(self.matriz)
+                valorT = self.valor + self.matriz[i[0]][i[1]]
+                matrizNueva[i[0]][i[1]] = 0
+                nuevo_hijo = Nodo(matrizNueva,self.caballo_blanco_x,self.caballo_blanco_y,i[0],i[1],-1,self.profundidad-1,valorT)
+                self.hijosE.append(nuevo_hijo)
+                
+    def mejor_jugada(self):
+        mejor_valor = float('-inf')
+        mejor_hijo = None
+
+        for hijo in self.hijosE:
+            if hijo.valor > mejor_valor:
+                mejor_valor = hijo.valor
+                mejor_hijo = hijo
+
+        return mejor_hijo
+        
+
 # Clase para representar el tablero del juego
 class Tablero:
     def __init__(self):
@@ -72,190 +113,193 @@ class Tablero:
         # -1 para el caballo blanco, 1 para el caballo negro
         self.turno = -1
 
-        # Puntuaciones
-        self.puntuaciones = puntuaciones
-
-        # Posiciones de los caballos
-        self.posicion_caballo_blanco = posiciones_caballo[0]
-        self.posicion_caballo_negro = posiciones_caballo[1]
-
-        # Puntuación de los caballos
+        # Atributos caballo blanco
+        self.caballo_blanco_x = posiciones_caballo[0][0]
+        self.caballo_blanco_y = posiciones_caballo[0][1]
         self.puntuacion_caballo_blanco = 0
+        self.imagen_caballo_blanco = pygame.image.load(RUTA_CABALLO_BLANCO)
+
+        # Atributos caballo negro
+        self.caballo_negro_x = posiciones_caballo[1][0]
+        self.caballo_negro_y = posiciones_caballo[1][1]
         self.puntuacion_caballo_negro = 0
+        self.imagen_caballo_negro = pygame.image.load(RUTA_CABALLO_NEGRO)
 
-    def dibujar(self, ventana):
+
+
+    def dibujar(self, ventana, resaltar):
         ventana.fill(COLOR_FONDO)
-
         for fila in range(FILAS):
             for columna in range(COLUMNAS):
-                x = columna * ANCHO_CELDA
-                y = fila * ALTO_CELDA
+                # Celda con borde de color negro
+                if (resaltar.__contains__([fila, columna])):
+                    pygame.draw.rect(ventana, COLOR_RESALTAR, (columna * ANCHO_CELDA, fila * ALTO_CELDA, ANCHO_CELDA, ALTO_CELDA))
+                    pygame.draw.rect(ventana, COLOR_BORDE_CELDA, (columna * ANCHO_CELDA, fila * ALTO_CELDA, ANCHO_CELDA, ALTO_CELDA), 1)
+                elif (self.matriz[fila][columna] > 0):
+                    pygame.draw.rect(ventana, COLOR_PUNTUACION, (columna * ANCHO_CELDA, fila * ALTO_CELDA, ANCHO_CELDA, ALTO_CELDA))
+                    pygame.draw.rect(ventana, COLOR_BORDE_CELDA, (columna * ANCHO_CELDA, fila * ALTO_CELDA, ANCHO_CELDA, ALTO_CELDA), 1)
+                else: 
+                    pygame.draw.rect(ventana, COLOR_CELDA, (columna * ANCHO_CELDA, fila * ALTO_CELDA, ANCHO_CELDA, ALTO_CELDA))
+                    pygame.draw.rect(ventana, COLOR_BORDE_CELDA, (columna * ANCHO_CELDA, fila * ALTO_CELDA, ANCHO_CELDA, ALTO_CELDA), 1)
 
-                pygame.draw.rect(ventana, COLOR_CELDA, (x, y, ANCHO_CELDA, ALTO_CELDA))
-                pygame.draw.rect(ventana, COLOR_BORDE_CELDA, (x, y, ANCHO_CELDA, ALTO_CELDA), 1)
+                if (self.matriz[fila][columna] > 0):
+                    valor = self.matriz[fila][columna]
+                    fuente = pygame.font.Font(None, 20)
+                    texto = fuente.render(str(valor), True, COLOR_BORDE_CELDA)
+                    ventana.blit(texto, (columna * ANCHO_CELDA + 5, fila * ALTO_CELDA + 5))
 
-                puntuacion = self.matriz[fila][columna]
-                if puntuacion != 0:
-                    imagen = pygame.image.load(f"puntuacion_{puntuacion}.png")
-                    ventana.blit(imagen, (x, y))
+                # Dibujar caballo blanco
+                if fila == self.caballo_blanco_y and columna == self.caballo_blanco_x:
+                    # pygame.draw.circle(ventana, COLOR_CABALLO_BLANCO, (columna * ANCHO_CELDA + ANCHO_CELDA // 2, fila * ALTO_CELDA + ALTO_CELDA // 2), min(ANCHO_CELDA, ALTO_CELDA) // 2)
+                    ventana.blit(self.imagen_caballo_blanco, (columna * ANCHO_CELDA, fila * ALTO_CELDA))
+                
 
-        # Dibujar caballos
-        x_blanco = self.posicion_caballo_blanco[0] * ANCHO_CELDA
-        y_blanco = self.posicion_caballo_blanco[1] * ALTO_CELDA
-        x_negro = self.posicion_caballo_negro[0] * ANCHO_CELDA
-        y_negro = self.posicion_caballo_negro[1] * ALTO_CELDA
+                # Dibujar caballo negro
+                if fila == self.caballo_negro_y and columna == self.caballo_negro_x:
+                    #pygame.draw.circle(ventana, COLOR_CABALLO_NEGRO, (columna * ANCHO_CELDA + ANCHO_CELDA // 2, fila * ALTO_CELDA + ALTO_CELDA // 2), min(ANCHO_CELDA, ALTO_CELDA) // 2)
+                    ventana.blit(self.imagen_caballo_negro, (columna * ANCHO_CELDA, fila * ALTO_CELDA))
 
-        pygame.draw.rect(ventana, COLOR_CABALLO_BLANCO, (x_blanco, y_blanco, ANCHO_CELDA, ALTO_CELDA))
-        pygame.draw.rect(ventana, COLOR_CABALLO_NEGRO, (x_negro, y_negro, ANCHO_CELDA, ALTO_CELDA))
-
-        pygame.display.update()
-
-    def verificarGanador(self):
-        if self.puntuacion_caballo_blanco + self.puntuacion_caballo_negro == len(self.puntuaciones):
-            return True
-        return False
 
     def posiciones_disponibles(self):
         posiciones = []
+        for fila in range(FILAS):
+            for columna in range(COLUMNAS):
+                # print(matriz)
+                
+                if self.turno == -1:
+                    if ((fila == self.caballo_blanco_y + 2 or fila == self.caballo_blanco_y - 2) and (columna == self.caballo_blanco_x + 1 or columna == self.caballo_blanco_x - 1)):
+                        posiciones.append([fila,columna])
+                        
+                    if ((fila == self.caballo_blanco_y + 1 or fila == self.caballo_blanco_y - 1) and (columna == self.caballo_blanco_x + 2 or columna == self.caballo_blanco_x - 2)):
+                        posiciones.append([fila,columna])
 
-        movimientos = [
-            (1, 2),
-            (-1, 2),
-            (1, -2),
-            (-1, -2),
-            (2, 1),
-            (2, -1),
-            (-2, 1),
-            (-2, -1)
-        ]
+                    if (posiciones.__contains__([self.caballo_negro_y, self.caballo_negro_x])):
+                        posiciones.remove([self.caballo_negro_y, self.caballo_negro_x])
+                    # print(posiciones)
+                else:
+                    if ((fila == self.caballo_negro_y + 2 or fila == self.caballo_negro_y - 2) and (columna == self.caballo_negro_x + 1 or columna == self.caballo_negro_x - 1)):
+                        posiciones.append([fila,columna])
+                        
+                    if ((fila == self.caballo_negro_y + 1 or fila == self.caballo_negro_y - 1) and (columna == self.caballo_negro_x + 2 or columna == self.caballo_negro_x - 2)):
+                        posiciones.append([fila,columna])
 
-        for movimiento in movimientos:
-            x = self.posicion_caballo_blanco[0] + movimiento[0]
-            y = self.posicion_caballo_blanco[1] + movimiento[1]
-
-            if 0 <= x < COLUMNAS and 0 <= y < FILAS and self.matriz[y][x] == 0:
-                posiciones.append((x, y))
-
-        return posiciones
-
-    def mover_caballo(self, columna, fila, posiciones):
-        if (columna, fila) in posiciones:
-            self.matriz[self.posicion_caballo_blanco[1]][self.posicion_caballo_blanco[0]] = 0
-            self.posicion_caballo_blanco = (columna, fila)
-            self.puntuacion_caballo_blanco += 1
-
-            # Actualizar puntuaciones
-            for puntuacion in self.puntuaciones:
-                if puntuacion[0] == columna and puntuacion[1] == fila:
-                    self.puntuaciones.remove(puntuacion)
-                    break
-
-        # Mover caballo negro
-        posiciones_disponibles_negro = self.posiciones_disponibles_negro()
-        if len(posiciones_disponibles_negro) > 0:
-            self.mover_caballo_negro(posiciones_disponibles_negro)
-
-    def posiciones_disponibles_negro(self):
-        posiciones = []
-
-        movimientos = [
-            (1, 2),
-            (-1, 2),
-            (1, -2),
-            (-1, -2),
-            (2, 1),
-            (2, -1),
-            (-2, 1),
-            (-2, -1)
-        ]
-
-        for movimiento in movimientos:
-            x = self.posicion_caballo_negro[0] + movimiento[0]
-            y = self.posicion_caballo_negro[1] + movimiento[1]
-
-            if 0 <= x < COLUMNAS and 0 <= y < FILAS and self.matriz[y][x] == 0:
-                posiciones.append((x, y))
+                    if (posiciones.__contains__([self.caballo_blanco_y, self.caballo_blanco_x])):
+                        posiciones.remove([self.caballo_blanco_y, self.caballo_blanco_x])
 
         return posiciones
+    
+    def verificarGanador(self):
+        cantidadPuntuacion = 0
+        for fila in range(FILAS):
+            for columna in range(COLUMNAS):
+                if (self.matriz[fila][columna] != 0):
+                    cantidadPuntuacion += 1
 
-    def mover_caballo_negro(self, posiciones):
-        movimiento = minimax(self, MAX_PROFUNDIDAD)
-        self.matriz[self.posicion_caballo_negro[1]][self.posicion_caballo_negro[0]] = 0
-        self.posicion_caballo_negro = movimiento
-        self.puntuacion_caballo_negro += 1
+        if (cantidadPuntuacion == 0):
+            if (self.puntuacion_caballo_blanco > self.puntuacion_caballo_negro):
+                print("Ha ganado el caballo blanco")
+            elif (self.puntuacion_caballo_negro > self.puntuacion_caballo_blanco):
+                print("Ha ganado el caballo negro")
+            else:
+                print("Han quedado en empate")
+            pygame.quit()
+            exit()
 
-        # Actualizar puntuaciones
-        for puntuacion in self.puntuaciones:
-            if puntuacion[0] == movimiento[0] and puntuacion[1] == movimiento[1]:
-                self.puntuaciones.remove(puntuacion)
-                break
+    def mover_caballo(self, x, y, posiciones):
+        print("sel.turno: " + str(self.turno))
+        # print()
+        # for fila in matriz:
+        #     for elemento in fila:
+        #         print(elemento, end=" ")  # Imprimir el elemento seguido de un espacio
+        #     print()  # Imprimir una nueva línea después de cada fila
+        # print()
+        # print("caballo blanco"*20)
+        # print(self.caballo_blanco_x)
+        # print(self.caballo_blanco_y)
+        # print("caballo negro"*20)
+        # print(self.caballo_negro_x)
+        # print(self.caballo_negro_y)
+        valor = self.matriz[y][x]
+        profundidad =  2
+        raiz = Nodo(matriz,self.caballo_blanco_x,self.caballo_blanco_y,self.caballo_negro_x,self.caballo_negro_y,-1,profundidad, 0)
+        print(raiz.hijosE)
+        if posiciones.__contains__([y, x]):
+            if self.turno == -1:
+                
+                print()
+                # self.caballo_blanco_x = x
+                # self.caballo_blanco_y = y
+                # self.puntuacion_caballo_blanco += valor
+            else:
+                self.caballo_negro_x = x
+                self.caballo_negro_y = y
+                self.puntuacion_caballo_negro += valor
+                print(self.caballo_negro_x)
+                
+            self.matriz[y][x] = 0
+            self.turno *= -1
 
+        # limpiar_consola()
+        print("Puntuación caballo blanco: " + str(self.puntuacion_caballo_blanco))
+        print("Puntuación caballo negro: " + str(self.puntuacion_caballo_negro))
 
-def minimax(tablero, profundidad):
-    if profundidad == 0 or tablero.verificarGanador():
-        return tablero.posicion_caballo_negro
+        tablero.verificarGanador()
+        
+def mejor_jugada(nodo, es_maximizador):
+    # Caso base: si es un nodo hoja, retornar su valor
+    if not nodo.hijos:
+        return nodo.valor
 
-    mejor_movimiento = None
-    mejor_puntuacion = float('-inf') if tablero.turno == -1 else float('inf')
+    # Inicializar la mejor jugada y su valor
+    mejor_valor = float('-inf') if es_maximizador else float('inf')
+    mejor_jugada = None
 
-    posiciones_disponibles_negro = tablero.posiciones_disponibles_negro()
-    for movimiento in posiciones_disponibles_negro:
-        copia_tablero = Tablero()  # Crear una copia del tablero original
-        copia_tablero.matriz = tablero.matriz
-        copia_tablero.puntuaciones = tablero.puntuaciones
-        copia_tablero.posicion_caballo_blanco = tablero.posicion_caballo_blanco
-        copia_tablero.posicion_caballo_negro = tablero.posicion_caballo_negro
-        copia_tablero.puntuacion_caballo_blanco = tablero.puntuacion_caballo_blanco
-        copia_tablero.puntuacion_caballo_negro = tablero.puntuacion_caballo_negro
+    # Recorrer los nodos hijos
+    for hijo in nodo.hijos:
+        # Calcular el valor del nodo hijo
+        valor_hijo = mejor_jugada(hijo, not es_maximizador)
 
-        copia_tablero.matriz[movimiento[1]][movimiento[0]] = 1
-        copia_tablero.posicion_caballo_negro = movimiento
-        copia_tablero.puntuacion_caballo_negro += 1
+        # Actualizar la mejor jugada y su valor en función del jugador
+        if es_maximizador:
+            if valor_hijo > mejor_valor:
+                mejor_valor = valor_hijo
+                mejor_jugada = hijo
+        else:
+            if valor_hijo < mejor_valor:
+                mejor_valor = valor_hijo
+                mejor_jugada = hijo
 
-        # Cambiar turno
-        copia_tablero.turno *= -1
+    # Retornar el valor de la mejor jugada
+    return mejor_valor
 
-        puntuacion = minimax(copia_tablero, profundidad - 1)
-
-        if tablero.turno == -1:  # Maximizar
-            if puntuacion > mejor_puntuacion:
-                mejor_puntuacion = puntuacion
-                mejor_movimiento = movimiento
-        else:  # Minimizar
-            if puntuacion < mejor_puntuacion:
-                mejor_puntuacion = puntuacion
-                mejor_movimiento = movimiento
-
-    return mejor_movimiento
-
-
-# Crear instancia del tablero
-tablero = Tablero()
 
 # Inicializar Pygame
 pygame.init()
-
-# Crear ventana
 ventana = pygame.display.set_mode((ANCHO_VENTANA, ALTO_VENTANA))
+pygame.display.set_caption("Juego del Caballo")
 
-# Nombre de la ventana
-pygame.display.set_caption("Smart Horses")
+# Crear el tablero
+tablero = Tablero()
 
 # Bucle principal del juego
-while not tablero.verificarGanador():
+while True:       
+    posiciones = tablero.posiciones_disponibles()
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             pygame.quit()
-
-    # Dibujar tablero
-    tablero.dibujar(ventana)
-
-    # Realizar movimiento
-    posiciones_disponibles = tablero.posiciones_disponibles()
-    if len(posiciones_disponibles) > 0:
-        tablero.mover_caballo(random.choice(posiciones_disponibles))
-
-    # Actualizar ventana
-    pygame.display.update()
-
-pygame.quit()
+            exit()
+        
+        if event.type == pygame.MOUSEBUTTONUP:
+            x, y = pygame.mouse.get_pos()
+            fila = y // ALTO_CELDA
+            columna = x // ANCHO_CELDA
+            tablero.mover_caballo(columna, fila, posiciones)
+            # if tablero.turno == 1:
+            #     tablero.mover_caballo(columna, fila, posiciones)
+            # else:
+            #     tablero.caballo_blanco_x = posiciones[0][1]
+            #     tablero.caballo_blanco_y = posiciones[0][0]
+    
+    tablero.dibujar(ventana, posiciones)
+    pygame.display.flip()
+ 
