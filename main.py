@@ -36,41 +36,41 @@ RUTA_CABALLO_BLANCO = "caballo_blanco.png"
 RUTA_CABALLO_NEGRO = "caballo_negro.png"
 
 posiciones_caballo = [[3,2],[5,7]]
-# while len(posiciones_caballo) < 2:
-#     x = random.randint(0,7)
-#     y = random.randint(0,7)
-#     nueva_posicion = [x, y]
+while len(posiciones_caballo) < 2:
+    x = random.randint(0,7)
+    y = random.randint(0,7)
+    nueva_posicion = [x, y]
 
-#     if nueva_posicion not in posiciones_caballo:
-#         posiciones_caballo.append(nueva_posicion)
+    if nueva_posicion not in posiciones_caballo:
+        posiciones_caballo.append(nueva_posicion)
 
-# matriz = [[0] * COLUMNAS for _ in range(FILAS)]
+matriz = [[0] * COLUMNAS for _ in range(FILAS)]
 
 puntuaciones = []
-# while len(puntuaciones) < 8:
-#     x = random.randint(0,7)
-#     y = random.randint(0,7)
-#     nueva_posicion = [x, y]
+while len(puntuaciones) < 8:
+    x = random.randint(0,7)
+    y = random.randint(0,7)
+    nueva_posicion = [x, y]
 
-#     if nueva_posicion not in puntuaciones and nueva_posicion not in posiciones_caballo:
-#         puntuaciones.append(nueva_posicion)
+    if nueva_posicion not in puntuaciones and nueva_posicion not in posiciones_caballo:
+        puntuaciones.append(nueva_posicion)
 
 
-# for i in range(len(puntuaciones)):
-#     x = puntuaciones[i][0]
-#     y = puntuaciones[i][1]
-#     matriz[y][x] = i
+for i in range(len(puntuaciones)):
+    x = puntuaciones[i][0]
+    y = puntuaciones[i][1]
+    matriz[y][x] = i
 
-matriz  = [
-    [0,0,0,0,0,0,0,6],
-    [0,1,0,0,0,0,0,0],
-    [0,0,7,0,0,0,0,8],
-    [0,0,0,0,0,4,0,0],
-    [0,0,2,0,0,0,0,0],
-    [0,0,0,0,0,0,0,0],
-    [0,0,0,3,0,0,0,0],
-    [0,0,0,0,0,0,5,0]
-]
+# matriz  = [
+#     [0,0,0,0,0,0,0,6],
+#     [0,1,0,0,0,0,0,0],
+#     [0,0,7,0,0,0,0,8],
+#     [0,0,0,0,0,4,0,0],
+#     [0,0,2,0,0,0,0,0],
+#     [0,0,0,0,0,0,0,0],
+#     [0,0,0,3,0,0,0,0],
+#     [0,0,0,0,0,0,5,0]
+# ]
 
 class Nodo:
     def __init__(self,matriz,caballo_blanco_x,caballo_blanco_y,caballo_negro_x,caballo_negro_y,turno,profundidad,  valorAB, valorAN, valorBN):
@@ -229,25 +229,9 @@ class Tablero:
                 print("Han quedado en empate")
             pygame.quit()
             exit()
-
+        
+    
     def mover_caballo(self, x, y, posiciones):
-        # print("sel.turno: " + str(self.turno))
-        # print()
-        # for fila in matriz:
-        #     for elemento in fila:
-        #         print(elemento, end=" ")  # Imprimir el elemento seguido de un espacio
-        #     print()  # Imprimir una nueva línea después de cada fila
-        # print()
-        # print("caballo blanco"*20)
-        # print(self.caballo_blanco_x)
-        # print(self.caballo_blanco_y)
-        # print("caballo negro"*20)
-        # print(self.caballo_negro_x)
-        # print(self.caballo_negro_y)
-        valor = self.matriz[y][x]
-        profundidad =  3
-        raiz = Nodo(matriz,self.caballo_blanco_x,self.caballo_blanco_y,self.caballo_negro_x,self.caballo_negro_y,-1,profundidad, 0,0,0)
-
         def minmax(nodo):
             valorHijos = []
             if nodo.valorBN == 0:
@@ -263,52 +247,35 @@ class Tablero:
                      return hijos_ordenados[0]
             else:
                 return nodo.valorBN
-            
-        minmax(raiz)
-
-        # def maximin_recursivo(nodo):
-        #     if not nodo.hijosE:
-        #         return nodo.final
-
-        #     minimos = []
-        #     for hijo in nodo.hijosE:
-        #         minimo_hijo = maximin_recursivo(hijo)
-        #         minimos.append(minimo_hijo)
-
-        #     nodo.final = max(minimos)
-        #     return nodo.final
         
-        # print(maximin_recursivo(raiz))
-
-        # raizMax = maximin_recursivo(raiz)
-
-        # print(raiz.hijosE)
-        def generar_grafo_1(nodo, grafo):
-            temp = "blanco x,y:\n" + str(nodo.caballo_blanco_x)+ "," + str(nodo.caballo_blanco_y) +"\n"   + "negro x,y:\n" + str(nodo.caballo_negro_x)+ "," + str(nodo.caballo_negro_y)+"\n"+ str(nodo.valorBN)+ "\n" + str(nodo.turno)
-            grafo.node(str(id(nodo)), label=temp)
-            for hijo in nodo.hijosE:
-                grafo.edge(str(id(nodo)), str(id(hijo)))
-                generar_grafo_1(hijo, grafo)
-        grafo1 = Digraph()
-        generar_grafo_1(raiz, grafo1)
-        grafo1.render('grafo', view=True)
-        if posiciones.__contains__([y, x]):
-            if self.turno == -1:
-                
-                print()
-                # self.caballo_blanco_x = x
-                # self.caballo_blanco_y = y
-                # self.puntuacion_caballo_blanco += valor
-            else:
-                self.caballo_negro_x = x
-                self.caballo_negro_y = y
-                self.puntuacion_caballo_negro += valor
-                print(self.caballo_negro_x)
-                
+        profundidad = 4
+        valor = self.matriz[y][x]
+        if posiciones.__contains__([y, x]) and self.turno ==1:
+            self.caballo_negro_x = x
+            self.caballo_negro_y = y
+            self.puntuacion_caballo_negro += valor
             self.matriz[y][x] = 0
             self.turno *= -1
-
-        # limpiar_consola()
+        if self.turno == -1:
+            raiz = Nodo(matriz,self.caballo_blanco_x,self.caballo_blanco_y,self.caballo_negro_x,self.caballo_negro_y,-1,profundidad, 0,0,0)
+            minmax(raiz)
+            def generar_grafo_1(nodo, grafo):
+                temp = "blanco x,y:\n" + str(nodo.caballo_blanco_x)+ "," + str(nodo.caballo_blanco_y) +"\n"   + "negro x,y:\n" + str(nodo.caballo_negro_x)+ "," + str(nodo.caballo_negro_y)+"\n"+ str(nodo.valorBN)+ "\n" + str(nodo.turno)
+                grafo.node(str(id(nodo)), label=temp)
+                for hijo in nodo.hijosE:
+                    grafo.edge(str(id(nodo)), str(id(hijo)))
+                    generar_grafo_1(hijo, grafo)
+            # grafo1 = Digraph()
+            # generar_grafo_1(raiz, grafo1)
+            # grafo1.render('grafo', view=True)
+            print("aqui la ia movio")
+            self.caballo_blanco_x = raiz.valorBN[2]
+            self.caballo_blanco_y = raiz.valorBN[3]
+            self.puntuacion_caballo_blanco += valor
+            self.matriz[self.caballo_blanco_y][self.caballo_blanco_x] = 0
+            self.turno *= -1
+            
+        limpiar_consola()
         print("Puntuación caballo blanco: " + str(self.puntuacion_caballo_blanco))
         print("Puntuación caballo negro: " + str(self.puntuacion_caballo_negro))
 
@@ -329,17 +296,13 @@ while True:
         if event.type == pygame.QUIT:
             pygame.quit()
             exit()
-        
+
         if event.type == pygame.MOUSEBUTTONUP:
             x, y = pygame.mouse.get_pos()
             fila = y // ALTO_CELDA
             columna = x // ANCHO_CELDA
+
             tablero.mover_caballo(columna, fila, posiciones)
-            # if tablero.turno == 1:
-            #     tablero.mover_caballo(columna, fila, posiciones)
-            # else:
-            #     tablero.caballo_blanco_x = posiciones[0][1]
-            #     tablero.caballo_blanco_y = posiciones[0][0]
     
     tablero.dibujar(ventana, posiciones)
     pygame.display.flip()
