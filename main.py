@@ -3,6 +3,7 @@ import random
 import os
 from copy import deepcopy
 from graphviz import Digraph
+import random
 
 def limpiar_consola():
     if os.name == 'nt':  # Para sistemas Windows
@@ -239,14 +240,35 @@ class Tablero:
                     valorHijos.append([minmax(hijo)[0],minmax(hijo)[1], hijo.caballo_blanco_x, hijo.caballo_blanco_y])
                 if nodo.turno == -1:
                     hijosOrdenados = sorted(valorHijos,key=lambda x: x[0], reverse=True)
-                    nodo.valorBN = hijosOrdenados[0]
-                    return hijosOrdenados[0]
+                    print("ordenados blanco ")
+                    print(hijosOrdenados)
+                    lista = list(filter(lambda x: x[0]==hijosOrdenados[0][0], hijosOrdenados))
+                    randoma  = random.choice(lista)
+
+                    # print("lista: ")
+                    # print(lista)
+                    # print(random.choice(lista))
+                    # nodo.valorBN = hijosOrdenados[0]
+                    nodo.valorBN = randoma
+                    # return hijosOrdenados[0]
+                    return randoma
                 else:
-                     hijos_ordenados = sorted(valorHijos, key=lambda x: x[1])
-                     nodo.valorBN = hijos_ordenados[0]
-                     return hijos_ordenados[0]
+                    print("ordenados negros")
+                    hijos_ordenados = sorted(valorHijos, key=lambda x: x[1])
+                    print(hijos_ordenados)
+                    lista = list(filter(lambda x: x[1]==hijos_ordenados[0][1], hijos_ordenados))
+                    randoma  = random.choice(lista)
+                    # print("lista: ")
+                    # print(lista)
+                    
+                    nodo.valorBN = randoma
+                    return randoma
+                    # nodo.valorBN = hijos_ordenados[0]
+                    # return hijos_ordenados[0]
+                
             else:
                 return nodo.valorBN
+                
         
         profundidad = 4
         valor = self.matriz[y][x]
@@ -265,17 +287,17 @@ class Tablero:
                 for hijo in nodo.hijosE:
                     grafo.edge(str(id(nodo)), str(id(hijo)))
                     generar_grafo_1(hijo, grafo)
-            # grafo1 = Digraph()
-            # generar_grafo_1(raiz, grafo1)
-            # grafo1.render('grafo', view=True)
-            print("aqui la ia movio")
+            grafo1 = Digraph()
+            generar_grafo_1(raiz, grafo1)
+            grafo1.render('grafo', view=True)
+            # print("aqui la ia movio")
             self.caballo_blanco_x = raiz.valorBN[2]
             self.caballo_blanco_y = raiz.valorBN[3]
             self.puntuacion_caballo_blanco += valor
             self.matriz[self.caballo_blanco_y][self.caballo_blanco_x] = 0
             self.turno *= -1
             
-        limpiar_consola()
+        # limpiar_consola()
         print("Puntuación caballo blanco: " + str(self.puntuacion_caballo_blanco))
         print("Puntuación caballo negro: " + str(self.puntuacion_caballo_negro))
 
