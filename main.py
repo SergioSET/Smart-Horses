@@ -86,7 +86,7 @@ class Nodo:
         self.valorAN = valorAN
         self.valorBN = valorBN
         self.profundidad= profundidad
-        self.hijos = tablero.posiciones_disponibles()
+        self.hijos = self.posiciones_disponibles()
         self.turno = turno
 
         if profundidad != 0:
@@ -128,6 +128,34 @@ class Nodo:
             return -1
         else:
             return 0
+        
+    def posiciones_disponibles(self):
+        posiciones = []
+        for fila in range(FILAS):
+            for columna in range(COLUMNAS):
+                # print(matriz)
+                
+                if tablero.turno == -1:
+                    if ((fila == self.caballo_blanco_y + 2 or fila == self.caballo_blanco_y - 2) and (columna == self.caballo_blanco_x + 1 or columna == self.caballo_blanco_x - 1)):
+                        posiciones.append([fila,columna])
+                        
+                    if ((fila == self.caballo_blanco_y + 1 or fila == self.caballo_blanco_y - 1) and (columna == self.caballo_blanco_x + 2 or columna == self.caballo_blanco_x - 2)):
+                        posiciones.append([fila,columna])
+
+                    if (posiciones.__contains__([self.caballo_negro_y, self.caballo_negro_x])):
+                        posiciones.remove([self.caballo_negro_y, self.caballo_negro_x])
+                    # print(posiciones)
+                else:
+                    if ((fila == self.caballo_negro_y + 2 or fila == self.caballo_negro_y - 2) and (columna == self.caballo_negro_x + 1 or columna == self.caballo_negro_x - 1)):
+                        posiciones.append([fila,columna])
+                        
+                    if ((fila == self.caballo_negro_y + 1 or fila == self.caballo_negro_y - 1) and (columna == self.caballo_negro_x + 2 or columna == self.caballo_negro_x - 2)):
+                        posiciones.append([fila,columna])
+
+                    if (posiciones.__contains__([self.caballo_blanco_y, self.caballo_blanco_x])):
+                        posiciones.remove([self.caballo_blanco_y, self.caballo_blanco_x])
+
+        return posiciones
 
         
 # Clase para representar el tablero del juego
@@ -240,8 +268,8 @@ class Tablero:
                     valorHijos.append([minmax(hijo)[0],minmax(hijo)[1], hijo.caballo_blanco_x, hijo.caballo_blanco_y])
                 if nodo.turno == -1:
                     hijosOrdenados = sorted(valorHijos,key=lambda x: x[0], reverse=True)
-                    print("ordenados blanco ")
-                    print(hijosOrdenados)
+                    #print("ordenados blanco ")
+                    #print(hijosOrdenados)
                     lista = list(filter(lambda x: x[0]==hijosOrdenados[0][0], hijosOrdenados))
                     randoma  = random.choice(lista)
 
@@ -253,9 +281,9 @@ class Tablero:
                     # return hijosOrdenados[0]
                     return randoma
                 else:
-                    print("ordenados negros")
+                    #print("ordenados negros")
                     hijos_ordenados = sorted(valorHijos, key=lambda x: x[1])
-                    print(hijos_ordenados)
+                    #print(hijos_ordenados)
                     lista = list(filter(lambda x: x[1]==hijos_ordenados[0][1], hijos_ordenados))
                     randoma  = random.choice(lista)
                     # print("lista: ")
@@ -270,14 +298,15 @@ class Tablero:
                 return nodo.valorBN
                 
         
-        profundidad = 4
-        valor = self.matriz[y][x]
+        profundidad = 6
         if posiciones.__contains__([y, x]) and self.turno ==1:
+            valor = self.matriz[y][x]
+            print("valor negro" + str(valor))
             self.caballo_negro_x = x
             self.caballo_negro_y = y
             self.puntuacion_caballo_negro += valor
             self.matriz[y][x] = 0
-            self.turno *= -1
+            self.turno = -1
         if self.turno == -1:
             raiz = Nodo(matriz,self.caballo_blanco_x,self.caballo_blanco_y,self.caballo_negro_x,self.caballo_negro_y,-1,profundidad, 0,0,0)
             minmax(raiz)
@@ -287,15 +316,17 @@ class Tablero:
                 for hijo in nodo.hijosE:
                     grafo.edge(str(id(nodo)), str(id(hijo)))
                     generar_grafo_1(hijo, grafo)
-            grafo1 = Digraph()
-            generar_grafo_1(raiz, grafo1)
-            grafo1.render('grafo', view=True)
-            # print("aqui la ia movio")
+            # grafo1 = Digraph()
+            # generar_grafo_1(raiz, grafo1)
+            # grafo1.render('grafo', view=True)
+            #print("aqui la ia movio")
             self.caballo_blanco_x = raiz.valorBN[2]
             self.caballo_blanco_y = raiz.valorBN[3]
+            valor = self.matriz[raiz.valorBN[3]][raiz.valorBN[2]]
+            #print("valor blanco" + str(valor))
             self.puntuacion_caballo_blanco += valor
             self.matriz[self.caballo_blanco_y][self.caballo_blanco_x] = 0
-            self.turno *= -1
+            self.turno = 1
             
         # limpiar_consola()
         print("Puntuación caballo blanco: " + str(self.puntuacion_caballo_blanco))
