@@ -71,40 +71,95 @@ matriz  = [
     [0,0,0,3,0,0,0,0],
     [0,0,0,0,0,0,5,0]
 ]
-
 class Nodo:
-    def __init__(self,matriz,caballo_blanco_x,caballo_blanco_y,caballo_negro_x,caballo_negro_y,turno,profundidad,  valorAB, valorAN):
+    def __init__(self,matriz,caballo_blanco_y,caballo_blanco_x,caballo_negro_y,caballo_negro_x,turno,profundidad, valorAB, valorAN):
+        print("fin nodo")
+        print("inicio nodo")
         self.matriz = matriz
         self.caballo_blanco_x = caballo_blanco_x
         self.caballo_blanco_y = caballo_blanco_y
         self.caballo_negro_x = caballo_negro_x
         self.caballo_negro_y = caballo_negro_y
         self.hijosE = []
-        tablero.turno = turno
+        self.turno = turno
         self.valorAB = valorAB
         self.valorAN = valorAN
         self.profundidad= profundidad
-        self.hijos = tablero.posiciones_disponibles()
+        self.valorBN= None
+        self.hijos = self.posiciones_disponibles()
+        print(self.hijos)
 
         if profundidad != 0:
             self.crear_hijos()
+    def posiciones_disponibles(self):
+        posiciones = []
+        for fila in range(FILAS):
+            for columna in range(COLUMNAS):
+                # print(matriz)
+                
+                if self.turno == -1:
+                    if ((fila == self.caballo_blanco_y + 2 or fila == self.caballo_blanco_y - 2) and (columna == self.caballo_blanco_x + 1 or columna == self.caballo_blanco_x - 1)):
+                        posiciones.append([fila,columna])
+                        
+                    if ((fila == self.caballo_blanco_y + 1 or fila == self.caballo_blanco_y - 1) and (columna == self.caballo_blanco_x + 2 or columna == self.caballo_blanco_x - 2)):
+                        posiciones.append([fila,columna])
+
+                    if (posiciones.__contains__([self.caballo_negro_y, self.caballo_negro_x])):
+                        posiciones.remove([self.caballo_negro_y, self.caballo_negro_x])
+                    # print(posiciones)
+                else:
+                    if ((fila == self.caballo_negro_y + 2 or fila == self.caballo_negro_y - 2) and (columna == self.caballo_negro_x + 1 or columna == self.caballo_negro_x - 1)):
+                        posiciones.append([fila,columna])
+                        
+                    if ((fila == self.caballo_negro_y + 1 or fila == self.caballo_negro_y - 1) and (columna == self.caballo_negro_x + 2 or columna == self.caballo_negro_x - 2)):
+                        posiciones.append([fila,columna])
+
+                    if (posiciones.__contains__([self.caballo_blanco_y, self.caballo_blanco_x])):
+                        posiciones.remove([self.caballo_blanco_y, self.caballo_blanco_x])
+        return posiciones
     def crear_hijos(self):
-        if tablero.turno == -1 :
-            # Turno caballo negro
+        if self.turno == -1 :
+            # Turno caballo blanco
             for i in self.hijos:
                 matrizNueva = deepcopy(self.matriz)
-                valorAB =  self.valorAB +  self.matriz[i[0]][i[1]]
-                matrizNueva[i[0]][i[1]] = 0
-                nuevo_hijo = Nodo(matrizNueva,i[1],i[0],self.caballo_negro_x,self.caballo_negro_y,1,self.profundidad-1, valorAB, self.valorAN)
+                valorAB =  self.valorAB +  self.matriz[i[1]][i[0]]
+                print("/-"*50)
+                print(i)
+                print(self.matriz[i[1]][i[0]])
+                print(valorAB)
+                matrizNueva[i[1]][i[0]] = 0
+                nuevo_hijo = Nodo(matrizNueva,i[0],i[1],self.caballo_negro_x,self.caballo_negro_y,1,self.profundidad-1, valorAB, self.valorAN)
+                nuevo_hijo.primero=False
                 self.hijosE.append(nuevo_hijo)
         else:
             # Turno caballo negro
             for i in self.hijos:
                 matrizNueva = deepcopy(self.matriz)
-                valorAN = self.valorAN + self.matriz[i[0]][i[1]]
-                matrizNueva[i[0]][i[1]] = 0
-                nuevo_hijo = Nodo(matrizNueva,self.caballo_blanco_x,self.caballo_blanco_y,i[1],i[0],-1,self.profundidad-1,self.valorAB, valorAN)
+                valorAN = self.valorAN + self.matriz[i[1]][i[0]]
+                print("-*"*50)
+                print(i)
+                print(self.matriz[i[1]][i[0]])
+                print(valorAN)
+                matrizNueva[i[1]][i[0]] = 0
+                nuevo_hijo = Nodo(matrizNueva,self.caballo_blanco_x,self.caballo_blanco_y,i[0],i[1],-1,self.profundidad-1,self.valorAB, valorAN)
+                nuevo_hijo.primero=False
                 self.hijosE.append(nuevo_hijo)
+
+    def minmax(self):
+        if self.hijosE[1].hijosE != []:
+            for elemento in  self.hijosE:
+                self.valorBN = elemento.minmax()
+        else:
+            if self.turno == -1:
+                bnp =  [self.valorAB,sorted(self.hijosE, key= lambda x : x.valorAN, reverse=False)[0].valorAN]
+                print(sorted(self.hijosE, key= lambda x : x.valorAN, reverse=False)[0].valorAN)
+            else:
+                bnp =  [sorted(self.hijosE, key= lambda x : x.valorAB)[0].valorBN,self.valorAN]
+                print(sorted(self.hijosE, key= lambda x : x.valorAB)[0].valorBN)
+            return bnp
+
+
+
         
 # Clase para representar el tablero del juego
 class Tablero:
@@ -208,7 +263,7 @@ class Tablero:
             exit()
 
     def mover_caballo(self, x, y, posiciones):
-        # print("sel.turno: " + str(self.turno))
+        print("sel.turno: " + str(self.turno))
         # print()
         # for fila in matriz:
         #     for elemento in fila:
@@ -223,10 +278,13 @@ class Tablero:
         # print(self.caballo_negro_y)
         valor = self.matriz[y][x]
         profundidad =  2
-        raiz = Nodo(matriz,self.caballo_blanco_x,self.caballo_blanco_y,self.caballo_negro_x,self.caballo_negro_y,-1,profundidad, 0,0)
-        # print(raiz.hijosE)
+        raiz = Nodo(matriz,self.caballo_blanco_x,self.caballo_blanco_y,self.caballo_negro_x,self.caballo_negro_y,-1,profundidad,0,0)
+        raiz.minmax()
+        print(raiz.valorBN)
+        print("-"*50)
+        print(raiz.hijosE)
         def generar_grafo_1(nodo, grafo):
-            temp = "blanco x,y:\n" + str(nodo.caballo_blanco_x)+ "," + str(nodo.caballo_blanco_y) +"\n"   + "negro x,y:\n" + str(nodo.caballo_negro_x)+ "," + str(nodo.caballo_negro_y)+"\n"+ str(nodo.valorAB) +","  + str(nodo.valorAN)+ "\n"
+            temp = "ValorBN:\n" + str(nodo.valorBN[0])+","+str(nodo.valorBN[1])
             grafo.node(str(id(nodo)), label=temp)
             for hijo in nodo.hijosE:
                 grafo.edge(str(id(nodo)), str(id(hijo)))
