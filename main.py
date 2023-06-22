@@ -73,7 +73,7 @@ matriz  = [
 ]
 
 class Nodo:
-    def __init__(self,matriz,caballo_blanco_x,caballo_blanco_y,caballo_negro_x,caballo_negro_y,turno,profundidad,  valorAB, valorAN):
+    def __init__(self,matriz,caballo_blanco_x,caballo_blanco_y,caballo_negro_x,caballo_negro_y,turno,profundidad,  valorAB, valorAN, valorBN):
         self.matriz = matriz
         self.caballo_blanco_x = caballo_blanco_x
         self.caballo_blanco_y = caballo_blanco_y
@@ -83,8 +83,10 @@ class Nodo:
         tablero.turno = turno
         self.valorAB = valorAB
         self.valorAN = valorAN
+        self.valorBN = valorBN
         self.profundidad= profundidad
         self.hijos = tablero.posiciones_disponibles()
+        self.turno = turno
 
         if profundidad != 0:
             self.crear_hijos()
@@ -95,16 +97,37 @@ class Nodo:
                 matrizNueva = deepcopy(self.matriz)
                 valorAB =  self.valorAB +  self.matriz[i[0]][i[1]]
                 matrizNueva[i[0]][i[1]] = 0
-                nuevo_hijo = Nodo(matrizNueva,i[1],i[0],self.caballo_negro_x,self.caballo_negro_y,1,self.profundidad-1, valorAB, self.valorAN)
-                self.hijosE.append(nuevo_hijo)
+
+                if self.profundidad == 1:
+                    nuevo_hijo = Nodo(matrizNueva,i[1],i[0],self.caballo_negro_x,self.caballo_negro_y,1,self.profundidad-1, valorAB, self.valorAN, [valorAB,self.valorAN])
+                    self.hijosE.append(nuevo_hijo)
+                else:
+                    nuevo_hijo = Nodo(matrizNueva,i[1],i[0],self.caballo_negro_x,self.caballo_negro_y,1,self.profundidad-1, valorAB, self.valorAN, 0)
+                    self.hijosE.append(nuevo_hijo)
+
+
         else:
             # Turno caballo negro
             for i in self.hijos:
                 matrizNueva = deepcopy(self.matriz)
                 valorAN = self.valorAN + self.matriz[i[0]][i[1]]
                 matrizNueva[i[0]][i[1]] = 0
-                nuevo_hijo = Nodo(matrizNueva,self.caballo_blanco_x,self.caballo_blanco_y,i[1],i[0],-1,self.profundidad-1,self.valorAB, valorAN)
-                self.hijosE.append(nuevo_hijo)
+
+                if self.profundidad == 1:
+                    nuevo_hijo = Nodo(matrizNueva,self.caballo_blanco_x,self.caballo_blanco_y,i[1],i[0],-1,self.profundidad-1,self.valorAB, valorAN, [self.valorAB, valorAN])
+                    self.hijosE.append(nuevo_hijo)
+                else:
+                    nuevo_hijo = Nodo(matrizNueva,self.caballo_blanco_x,self.caballo_blanco_y,i[1],i[0],-1,self.profundidad-1,self.valorAB, valorAN, 0)
+                    self.hijosE.append(nuevo_hijo)
+
+    def evaluar(self):
+        if self.valorAB > self.valorAN:
+            return 1
+        elif self.valorAB < self.valorAN:
+            return -1
+        else:
+            return 0
+
         
 # Clase para representar el tablero del juego
 class Tablero:
@@ -222,11 +245,46 @@ class Tablero:
         # print(self.caballo_negro_x)
         # print(self.caballo_negro_y)
         valor = self.matriz[y][x]
-        profundidad =  2
-        raiz = Nodo(matriz,self.caballo_blanco_x,self.caballo_blanco_y,self.caballo_negro_x,self.caballo_negro_y,-1,profundidad, 0,0)
+        profundidad =  3
+        raiz = Nodo(matriz,self.caballo_blanco_x,self.caballo_blanco_y,self.caballo_negro_x,self.caballo_negro_y,-1,profundidad, 0,0,0)
+
+        def minmax(nodo):
+            valorHijos = []
+            if nodo.valorBN == 0:
+                for hijo in nodo.hijosE:
+                    valorHijos.append([minmax(hijo)[0],minmax(hijo)[1], hijo.caballo_blanco_x, hijo.caballo_blanco_y])
+                if nodo.turno == -1:
+                    hijosOrdenados = sorted(valorHijos,key=lambda x: x[0], reverse=True)
+                    nodo.valorBN = hijosOrdenados[0]
+                    return hijosOrdenados[0]
+                else:
+                     hijos_ordenados = sorted(valorHijos, key=lambda x: x[1])
+                     nodo.valorBN = hijos_ordenados[0]
+                     return hijos_ordenados[0]
+            else:
+                return nodo.valorBN
+            
+        minmax(raiz)
+
+        # def maximin_recursivo(nodo):
+        #     if not nodo.hijosE:
+        #         return nodo.final
+
+        #     minimos = []
+        #     for hijo in nodo.hijosE:
+        #         minimo_hijo = maximin_recursivo(hijo)
+        #         minimos.append(minimo_hijo)
+
+        #     nodo.final = max(minimos)
+        #     return nodo.final
+        
+        # print(maximin_recursivo(raiz))
+
+        # raizMax = maximin_recursivo(raiz)
+
         # print(raiz.hijosE)
         def generar_grafo_1(nodo, grafo):
-            temp = "blanco x,y:\n" + str(nodo.caballo_blanco_x)+ "," + str(nodo.caballo_blanco_y) +"\n"   + "negro x,y:\n" + str(nodo.caballo_negro_x)+ "," + str(nodo.caballo_negro_y)+"\n"+ str(nodo.valorAB) +","  + str(nodo.valorAN)+ "\n"
+            temp = "blanco x,y:\n" + str(nodo.caballo_blanco_x)+ "," + str(nodo.caballo_blanco_y) +"\n"   + "negro x,y:\n" + str(nodo.caballo_negro_x)+ "," + str(nodo.caballo_negro_y)+"\n"+ str(nodo.valorBN)+ "\n" + str(nodo.turno)
             grafo.node(str(id(nodo)), label=temp)
             for hijo in nodo.hijosE:
                 grafo.edge(str(id(nodo)), str(id(hijo)))
@@ -255,7 +313,6 @@ class Tablero:
         print("Puntuación caballo negro: " + str(self.puntuacion_caballo_negro))
 
         tablero.verificarGanador()
-        
 
 # Inicializar Pygame
 pygame.init()
@@ -286,8 +343,3 @@ while True:
     
     tablero.dibujar(ventana, posiciones)
     pygame.display.flip()
-
-    
-
-    
- 
