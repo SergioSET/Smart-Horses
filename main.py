@@ -245,7 +245,7 @@ class Tablero:
         # print(self.caballo_negro_x)
         # print(self.caballo_negro_y)
         valor = self.matriz[y][x]
-        profundidad =  2
+        profundidad =  3
         raiz = Nodo(matriz,self.caballo_blanco_x,self.caballo_blanco_y,self.caballo_negro_x,self.caballo_negro_y,-1,profundidad, 0,0,0)
 
         def minmax(nodo):
@@ -255,21 +255,16 @@ class Tablero:
                     valorHijos.append([minmax(hijo)[0],minmax(hijo)[1], hijo.caballo_blanco_x, hijo.caballo_blanco_y])
                 if nodo.turno == -1:
                     hijosOrdenados = sorted(valorHijos,key=lambda x: x[0], reverse=True)
-                    print("menos uno")
-                    print(hijosOrdenados)
                     nodo.valorBN = hijosOrdenados[0]
                     return hijosOrdenados[0]
                 else:
                      hijos_ordenados = sorted(valorHijos, key=lambda x: x[1])
-                     print("uno")
-                     print(hijos_ordenados)
                      nodo.valorBN = hijos_ordenados[0]
                      return hijos_ordenados[0]
             else:
                 return nodo.valorBN
             
-        print("JACUNAMATATA")
-        print(minmax(raiz))
+        minmax(raiz)
 
         # def maximin_recursivo(nodo):
         #     if not nodo.hijosE:
