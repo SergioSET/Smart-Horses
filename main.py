@@ -15,6 +15,8 @@ def limpiar_consola():
 ANCHO_VENTANA = 500
 ALTO_VENTANA = 500
 
+profundidad = 6
+
 # Dimensiones de la matriz
 FILAS = 8
 COLUMNAS = 8
@@ -74,8 +76,9 @@ for i in range(len(puntuaciones)):
 # ]
 
 class Nodo:
-    def __init__(self,matriz,caballo_blanco_x,caballo_blanco_y,caballo_negro_x,caballo_negro_y,turno,profundidad,  valorAB, valorAN, valorBN):
+    def __init__(self,padre,matriz,caballo_blanco_x,caballo_blanco_y,caballo_negro_x,caballo_negro_y,turno,profundidad,  valorAB, valorAN, valorBN):
         self.matriz = matriz
+        self.padre = padre
         self.caballo_blanco_x = caballo_blanco_x
         self.caballo_blanco_y = caballo_blanco_y
         self.caballo_negro_x = caballo_negro_x
@@ -100,10 +103,10 @@ class Nodo:
                 matrizNueva[i[0]][i[1]] = 0
 
                 if self.profundidad == 1:
-                    nuevo_hijo = Nodo(matrizNueva,i[1],i[0],self.caballo_negro_x,self.caballo_negro_y,1,self.profundidad-1, valorAB, self.valorAN, [valorAB,self.valorAN])
+                    nuevo_hijo = Nodo(self,matrizNueva,i[1],i[0],self.caballo_negro_x,self.caballo_negro_y,1,self.profundidad-1, valorAB, self.valorAN, [valorAB,self.valorAN])
                     self.hijosE.append(nuevo_hijo)
                 else:
-                    nuevo_hijo = Nodo(matrizNueva,i[1],i[0],self.caballo_negro_x,self.caballo_negro_y,1,self.profundidad-1, valorAB, self.valorAN, 0)
+                    nuevo_hijo = Nodo(self,matrizNueva,i[1],i[0],self.caballo_negro_x,self.caballo_negro_y,1,self.profundidad-1, valorAB, self.valorAN, 0)
                     self.hijosE.append(nuevo_hijo)
 
 
@@ -115,10 +118,10 @@ class Nodo:
                 matrizNueva[i[0]][i[1]] = 0
 
                 if self.profundidad == 1:
-                    nuevo_hijo = Nodo(matrizNueva,self.caballo_blanco_x,self.caballo_blanco_y,i[1],i[0],-1,self.profundidad-1,self.valorAB, valorAN, [self.valorAB, valorAN])
+                    nuevo_hijo = Nodo(self,matrizNueva,self.caballo_blanco_x,self.caballo_blanco_y,i[1],i[0],-1,self.profundidad-1,self.valorAB, valorAN, [self.valorAB, valorAN])
                     self.hijosE.append(nuevo_hijo)
                 else:
-                    nuevo_hijo = Nodo(matrizNueva,self.caballo_blanco_x,self.caballo_blanco_y,i[1],i[0],-1,self.profundidad-1,self.valorAB, valorAN, 0)
+                    nuevo_hijo = Nodo(self,matrizNueva,self.caballo_blanco_x,self.caballo_blanco_y,i[1],i[0],-1,self.profundidad-1,self.valorAB, valorAN, 0)
                     self.hijosE.append(nuevo_hijo)
 
     def evaluar(self):
@@ -265,19 +268,29 @@ class Tablero:
             valorHijos = []
             if nodo.valorBN == 0:
                 for hijo in nodo.hijosE:
-                    valorHijos.append([minmax(hijo)[0],minmax(hijo)[1], hijo.caballo_blanco_x, hijo.caballo_blanco_y])
+                    if self.profundidad == profundidad or self.padre.valorBN == None:
+                        valorHijos.append([minmax(hijo)[0],minmax(hijo)[1], hijo.caballo_blanco_x, hijo.caballo_blanco_y])
+                    else:
+                        if self.turno == -1:
+                            if hijo[]
+                                        
                 if nodo.turno == -1:
                     hijosOrdenados = sorted(valorHijos,key=lambda x: x[0], reverse=True)
                     #print("ordenados blanco ")
                     #print(hijosOrdenados)
                     lista = list(filter(lambda x: x[0]==hijosOrdenados[0][0], hijosOrdenados))
+
+                    
                     randoma  = random.choice(lista)
 
-                    # print("lista: ")
-                    # print(lista)
-                    # print(random.choice(lista))
+                    #print("lista: ")
+                    #print(lista)
+                    #print("randoma")
+                    #print(randoma)
+                    #print(random.choice(lista))
                     # nodo.valorBN = hijosOrdenados[0]
                     nodo.valorBN = randoma
+                    print(nodo.valorBN)
                     # return hijosOrdenados[0]
                     return randoma
                 else:
@@ -286,8 +299,11 @@ class Tablero:
                     #print(hijos_ordenados)
                     lista = list(filter(lambda x: x[1]==hijos_ordenados[0][1], hijos_ordenados))
                     randoma  = random.choice(lista)
-                    # print("lista: ")
-                    # print(lista)
+                   # print("lista: ")
+                    #print("lista: ")
+                    #print(lista)
+                    #print("randoma")
+                    #print(randoma)
                     
                     nodo.valorBN = randoma
                     return randoma
@@ -298,7 +314,7 @@ class Tablero:
                 return nodo.valorBN
                 
         
-        profundidad = 6
+        
         if posiciones.__contains__([y, x]) and self.turno ==1:
             valor = self.matriz[y][x]
             print("valor negro" + str(valor))
@@ -308,7 +324,7 @@ class Tablero:
             self.matriz[y][x] = 0
             self.turno = -1
         if self.turno == -1:
-            raiz = Nodo(matriz,self.caballo_blanco_x,self.caballo_blanco_y,self.caballo_negro_x,self.caballo_negro_y,-1,profundidad, 0,0,0)
+            raiz = Nodo(None,matriz,self.caballo_blanco_x,self.caballo_blanco_y,self.caballo_negro_x,self.caballo_negro_y,-1,profundidad, 0,0,0)
             minmax(raiz)
             def generar_grafo_1(nodo, grafo):
                 temp = "blanco x,y:\n" + str(nodo.caballo_blanco_x)+ "," + str(nodo.caballo_blanco_y) +"\n"   + "negro x,y:\n" + str(nodo.caballo_negro_x)+ "," + str(nodo.caballo_negro_y)+"\n"+ str(nodo.valorBN)+ "\n" + str(nodo.turno)
