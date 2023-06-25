@@ -268,11 +268,7 @@ class Tablero:
             valorHijos = []
             if nodo.valorBN == 0:
                 for hijo in nodo.hijosE:
-                    if self.profundidad == profundidad or self.padre.valorBN == None:
                         valorHijos.append([minmax(hijo)[0],minmax(hijo)[1], hijo.caballo_blanco_x, hijo.caballo_blanco_y])
-                    else:
-                        if self.turno == -1:
-                            if hijo[]
                                         
                 if nodo.turno == -1:
                     hijosOrdenados = sorted(valorHijos,key=lambda x: x[0], reverse=True)
@@ -290,7 +286,7 @@ class Tablero:
                     #print(random.choice(lista))
                     # nodo.valorBN = hijosOrdenados[0]
                     nodo.valorBN = randoma
-                    print(nodo.valorBN)
+                    #print(nodo.valorBN)
                     # return hijosOrdenados[0]
                     return randoma
                 else:
