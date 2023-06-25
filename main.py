@@ -280,14 +280,14 @@ class Tablero:
                             meter  = [minmax(hijo)[0],minmax(hijo)[1], hijo.caballo_blanco_x, hijo.caballo_blanco_y]
                             if self.turno == 1:
                                 if  meter[1]  < nodo.padre.valorHijos[0][1]:
-                                     print("break")
+                                    #  print("break")
                                      nodo.valorHijos.append([minmax(hijo)[0],minmax(hijo)[1], hijo.caballo_blanco_x, hijo.caballo_blanco_y])
                                      break
                                 else:#meter[1]  < nodo.padre.valorHijos[0][1]
                                     nodo.valorHijos.append([minmax(hijo)[0],minmax(hijo)[1], hijo.caballo_blanco_x, hijo.caballo_blanco_y])
                             else:  #self.turno==-1
                                 if  meter[0]  > nodo.padre.valorHijos[0][0]:
-                                     print("break")
+                                    #  print("break")
                                      nodo.valorHijos.append([minmax(hijo)[0],minmax(hijo)[1], hijo.caballo_blanco_x, hijo.caballo_blanco_y])
                                      break
                                 else:#meter[0]  > nodo.padre.valorHijos[0][0]
@@ -322,11 +322,11 @@ class Tablero:
             self.turno = -1
         if self.turno == -1:
             raiz = Nodo(None,matriz,self.caballo_blanco_x,self.caballo_blanco_y,self.caballo_negro_x,self.caballo_negro_y,-1,profundidad, 0,0,0,[])
-            inicio = time.time()
+            # inicio = time.time()
             minmax(raiz)
-            fin = time.time()
-            tiempo_transcurrido = fin - inicio
-            print("Tiempo transcurrido:", tiempo_transcurrido, "segundos")
+            # fin = time.time()
+            # tiempo_transcurrido = fin - inicio
+            # print("Tiempo transcurrido:", tiempo_transcurrido, "segundos")
             def generar_grafo_1(nodo, grafo):
                 temp = "blanco x,y:\n" + str(nodo.caballo_blanco_x)+ "," + str(nodo.caballo_blanco_y) +"\n"   + "negro x,y:\n" + str(nodo.caballo_negro_x)+ "," + str(nodo.caballo_negro_y)+"\n"+ str(nodo.valorBN)+ "\n" + str(nodo.turno)
                 grafo.node(str(id(nodo)), label=temp)
