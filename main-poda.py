@@ -295,7 +295,7 @@ def main(profundidad):
             for fila in range(FILAS):
                 for columna in range(COLUMNAS):
                     # Celda con borde de color negro
-                    if resaltar.__contains__([fila, columna]):
+                    if (resaltar.__contains__([fila, columna]) and self.turno == 1):
                         pygame.draw.rect(
                             ventana,
                             COLOR_RESALTAR,
@@ -641,11 +641,11 @@ def main(profundidad):
             print("Puntuación caballo negro: " + str(self.puntuacion_caballo_negro))
 
             tablero.verificarGanador()
-
+            
     # Inicializar Pygame
     pygame.init()
     ventana = pygame.display.set_mode((ANCHO_VENTANA, ALTO_VENTANA))
-    pygame.display.set_caption("Juego del Caballo")
+    pygame.display.set_caption("Juego del Caballo - Click para jugar")
 
     # Crear el tablero
     tablero = Tablero()
@@ -662,7 +662,6 @@ def main(profundidad):
                 x, y = pygame.mouse.get_pos()
                 fila = y // ALTO_CELDA
                 columna = x // ANCHO_CELDA
-
                 tablero.mover_caballo(columna, fila, posiciones)
 
         tablero.dibujar(ventana, posiciones)
@@ -670,6 +669,7 @@ def main(profundidad):
 
 
 if __name__ == "__main__":
+
     decision = easygui.indexbox(
         msg="Bienvenido a Smart Horses, su pieza será el caballo negro, a continuación seleccione la dificultad, recuerde que estará relacionado con la profundidad que la IA podrá analizar para su movimiento.",
         title="Smart Horses",
@@ -686,5 +686,5 @@ if __name__ == "__main__":
         profundidad = 6
     else:
         exit()
-
+    # print(profundidad)
     main(profundidad)
